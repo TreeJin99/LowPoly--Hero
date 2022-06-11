@@ -28,7 +28,6 @@ public class Player_Controller : MonoBehaviour
     private float currentHP;
     private float currentSpeed;
     private float attackDelay;
-    private float jumpDelay = 1f;
 
     private Vector3 moveDir;
 
@@ -71,14 +70,44 @@ public class Player_Controller : MonoBehaviour
         toggleCamera();
     }
 
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        Rigidbody body = hit.collider.attachedRigidbody;
+        if (body == null || body.isKinematic)
+            return;
+
+        if (hit.moveDirection.y < -0.3f)
+            return;
+
+
+        if (hit.gameObject.tag == "Enemy")
+            Debug.Log("적팀!");
+
+        Debug.Log("충돌했으!");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Item"))
+        {
+            Debug.Log("아이템!");
+        }
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.collider.gameObject.CompareTag("Item"))
         {
             Debug.Log("아이템!!");
         }
-    }
+        else if(collision.collider.gameObject.CompareTag("Enemy"))
+        {
+            Debug.Log("적팀!");
+        }
 
+        if (collision.gameObject.tag == "Item")
+            Debug.Log("ㅇㄴㅁㅇㄴㅁ");
+    }
 
     private void GetInput()
     {
