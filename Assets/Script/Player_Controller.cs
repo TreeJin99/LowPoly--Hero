@@ -7,25 +7,36 @@ public class Player_Controller : MonoBehaviour
     private Animator _animator;
     private Camera _camera;
     private CharacterController _characterController;
-    private Vector3 moveVelocity;
 
+    // 플레이어 기본 스탯
+    public float playerDamage = 20f;
     public float walkSpeed = 2f;
     public float defendSpeed = 1f;
     public float runSpeed = 4f;
+    public float jumpHeight = 3f;
+
+    // 플레이어 무기 & 방어구
+    public Collider weaponCollider;
+    public Collider shieldCollider;
+    public TrailRenderer trailEffect;
+    public float attackSpeed = 0.4f;
+
+    // 플레이어 움직임 시스템 설정 
     public float smoothness = 10f;
-    public float attackSpeed = 0f;
-    public float jumpHeight = 300f;
-    public float gravity = -20f;
+    public float gravity = 10f;
 
     private float currentHP;
     private float currentSpeed;
     private float attackDelay;
-    private float jumpSpeed = 15;
+    private float jumpDelay = 1f;
+
+    private Vector3 moveDir;
 
     private float hAxis;
     private float vAxis;
     private float xMouse;
     private float yMouse;
+
 
     private bool wDown;
     private bool altDown;
@@ -36,24 +47,39 @@ public class Player_Controller : MonoBehaviour
     private bool isDefend;
     private bool isCoolTime;
 
+    private void Awake()
+    {
+    }
+
     private void Start()
     {
         _animator = GetComponent<Animator>();
         _camera = Camera.main;
         _characterController = GetComponent<CharacterController>();
+        moveDir = Vector3.zero;
     }
 
     private void Update()
     {
         GetInput();
         Movement();
-        SetAnimator();
+        Action();
     }
 
     private void LateUpdate()
     {
         toggleCamera();
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.gameObject.CompareTag("Item"))
+        {
+            Debug.Log("아이템!!");
+        }
+    }
+
+
     private void GetInput()
     {
 
@@ -63,7 +89,7 @@ public class Player_Controller : MonoBehaviour
         altDown = Input.GetKey(KeyCode.LeftAlt);
         wDown = Input.GetKey(KeyCode.W);
 
-        isJump = Input.GetKeyDown(KeyCode.Space);
+        isJump = Input.GetKey(KeyCode.Space);
         isRun = Input.GetKey(KeyCode.LeftShift);
 
         isAttack = Input.GetMouseButtonDown(0);
@@ -82,24 +108,53 @@ public class Player_Controller : MonoBehaviour
     private void Movement()
     {
         currentSpeed = isDefend ? defendSpeed : isRun ? runSpeed : walkSpeed;
+        if (_characterController.isGrounded)
+        {
+            moveDir = new Vector3(hAxis, 0, vAxis);
+            moveDir = transform.TransformDirection(moveDir);
+            moveDir *= currentSpeed;
 
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right = transform.TransformDirection(Vector3.right);
-        Vector3 moveDir = forward * vAxis + right * hAxis;
+            if (isJump)
+                moveDir.y = jumpHeight;
+        }
 
-        _characterController.Move(moveDir.normalized * currentSpeed * Time.deltaTime);
+        moveDir.y -= gravity * Time.deltaTime;
+        _characterController.Move(moveDir * Time.deltaTime);
 
-
-    }
-
-    private void SetAnimator()
-    {
         float isMove = isRun ? 1 : wDown ? 0.5f : 0;
-
         _animator.SetFloat("Blend", isMove, 0.1f, Time.deltaTime);
 
-        if (isDefend)
-            _animator.SetTrigger("isDefend");
     }
+
+    private void Action()
+    {
+        attackDelay += Time.deltaTime;
+        isCoolTime = attackDelay + attackSpeed < 1f;
+
+        if (isAttack && !isCoolTime && !isDefend)
+        {
+            StopCoroutine("Attack");
+            StartCoroutine("Attack");
+            _animator.SetTrigger("isAttack");
+            attackDelay = 0f;
+        }
+        else if (!isAttack && isDefend)
+        {
+            shieldCollider.enabled = true;
+            _animator.SetTrigger("isDefend");
+        }
+    }
+
+
+    IEnumerator Attack()
+    {
+        yield return new WaitForSeconds(0.1f);
+        weaponCollider.enabled = true;
+
+        yield return new WaitForSeconds(0.3f);
+        weaponCollider.enabled = false;
+    }
+
+
 
 }

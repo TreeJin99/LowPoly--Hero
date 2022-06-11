@@ -351,6 +351,8 @@
 -r:"Library/Bee/artifacts/1900b0aE.dag/UnityEditor.UI.ref.dll"
 -r:"Library/Bee/artifacts/1900b0aE.dag/UnityEngine.UI.ref.dll"
 "Assets/Script/Camera_Controller.cs"
+"Assets/Script/Enemy_Controller.cs"
+"Assets/Script/Item_Controller.cs"
 "Assets/Script/Player_Controller.cs"
 -langversion:9.0
 
