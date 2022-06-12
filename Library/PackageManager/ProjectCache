@@ -5,7 +5,7 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 637905230698498734
+      ticks: 637905975219435896
     m_Hash: 2886274747
   m_LockFileStatus:
     m_FilePath: C:/Users/mokuj/OneDrive/WorkSpace/Unity/LowPoly-Hero/Packages/packages-lock.json
@@ -13,7 +13,7 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 637905230698508767
+      ticks: 637905975219442145
     m_Hash: 692750746
 m_EmbeddedPackageManifests:
   m_ManifestsStatus: {}

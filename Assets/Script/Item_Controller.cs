@@ -12,4 +12,12 @@ public class Item_Controller : MonoBehaviour
     {
         transform.Rotate(Vector3.fwd * 20 * Time.deltaTime);
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            Destroy(gameObject);
+        }
+    }
 }

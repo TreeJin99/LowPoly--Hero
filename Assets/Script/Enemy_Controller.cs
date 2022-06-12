@@ -67,4 +67,12 @@ public class Enemy_Controller : MonoBehaviour
         }
     }
 
+    public void HitByGrenade(Vector3 explosionPos)
+    {
+        currentHP -= 100;
+
+        Vector3 knockBack = transform.position - explosionPos;
+        StartCoroutine(OnDamage(knockBack));
+    }
+
 }

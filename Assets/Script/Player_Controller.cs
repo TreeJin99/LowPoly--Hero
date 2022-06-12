@@ -9,6 +9,7 @@ public class Player_Controller : MonoBehaviour
     private CharacterController _characterController;
 
     // 플레이어 기본 스탯
+    public float playerHP = 100f;
     public float playerDamage = 20f;
     public float walkSpeed = 2f;
     public float defendSpeed = 1f;
@@ -16,6 +17,7 @@ public class Player_Controller : MonoBehaviour
     public float jumpHeight = 3f;
 
     // 플레이어 무기 & 방어구
+    public GameObject grenadeObj;
     public Collider weaponCollider;
     public Collider shieldCollider;
     public TrailRenderer trailEffect;
@@ -28,6 +30,7 @@ public class Player_Controller : MonoBehaviour
     private float currentHP;
     private float currentSpeed;
     private float attackDelay;
+    private int grenadeNum = 10;
 
     private Vector3 moveDir;
 
@@ -38,6 +41,7 @@ public class Player_Controller : MonoBehaviour
 
 
     private bool wDown;
+    private bool gDown;
     private bool altDown;
 
     private bool isJump;
@@ -56,6 +60,7 @@ public class Player_Controller : MonoBehaviour
         _camera = Camera.main;
         _characterController = GetComponent<CharacterController>();
         moveDir = Vector3.zero;
+        currentHP = playerHP;
     }
 
     private void Update()
@@ -83,30 +88,25 @@ public class Player_Controller : MonoBehaviour
         if (hit.gameObject.tag == "Enemy")
             Debug.Log("적팀!");
 
-        Debug.Log("충돌했으!");
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Item"))
         {
-            Debug.Log("아이템!");
-        }
-    }
+            switch (other.gameObject.name)
+            {
+                case "Health":
+                    Debug.Log("치료!");
+                    currentHP += 50;
+                    break;
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.collider.gameObject.CompareTag("Item"))
-        {
-            Debug.Log("아이템!!");
+                case "Grenade Item":
+                    Debug.Log("수류탄 획득!");
+                    grenadeNum++;
+                    break;
+            }
         }
-        else if(collision.collider.gameObject.CompareTag("Enemy"))
-        {
-            Debug.Log("적팀!");
-        }
-
-        if (collision.gameObject.tag == "Item")
-            Debug.Log("ㅇㄴㅁㅇㄴㅁ");
     }
 
     private void GetInput()
@@ -117,6 +117,7 @@ public class Player_Controller : MonoBehaviour
 
         altDown = Input.GetKey(KeyCode.LeftAlt);
         wDown = Input.GetKey(KeyCode.W);
+        gDown = Input.GetKeyDown(KeyCode.G);
 
         isJump = Input.GetKey(KeyCode.Space);
         isRun = Input.GetKey(KeyCode.LeftShift);
@@ -147,6 +148,7 @@ public class Player_Controller : MonoBehaviour
                 moveDir.y = jumpHeight;
         }
 
+
         moveDir.y -= gravity * Time.deltaTime;
         _characterController.Move(moveDir * Time.deltaTime);
 
@@ -172,6 +174,22 @@ public class Player_Controller : MonoBehaviour
             shieldCollider.enabled = true;
             _animator.SetTrigger("isDefend");
         }
+
+        if (gDown)
+        {
+            if (grenadeNum > 0 && !isAttack && !isDefend)
+            {
+                Vector3 grenadePos = new Vector3(transform.position.x, transform.position.y + 1, transform.position.z);
+                GameObject grenadeThrow = Instantiate(grenadeObj, grenadePos, transform.rotation);
+                Rigidbody grenadeRigid = grenadeThrow.GetComponent<Rigidbody>();
+
+                grenadeRigid.AddForce(new Vector3(moveDir.x, moveDir.y + 2, moveDir.z) * 2, ForceMode.Impulse);
+                grenadeRigid.AddTorque(Vector3.back * 10, ForceMode.Impulse);
+
+                grenadeNum--;
+            }
+        }
+
     }
 
 
