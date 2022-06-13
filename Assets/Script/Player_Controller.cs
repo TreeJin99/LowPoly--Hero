@@ -4,9 +4,13 @@ using UnityEngine;
 
 public class Player_Controller : MonoBehaviour
 {
+    public static Player_Controller PLAYER_INSTANCE;
+
     private Animator _animator;
     private Camera _camera;
     private CharacterController _characterController;
+    private Renderer _renderer;
+    private Color originColor;
 
     // 플레이어 기본 스탯
     public float playerHP = 100f;
@@ -49,9 +53,11 @@ public class Player_Controller : MonoBehaviour
     private bool isAttack;
     private bool isDefend;
     private bool isCoolTime;
+    private bool isDamaged;
 
     private void Awake()
     {
+        PLAYER_INSTANCE = this;
     }
 
     private void Start()
@@ -61,6 +67,9 @@ public class Player_Controller : MonoBehaviour
         _characterController = GetComponent<CharacterController>();
         moveDir = Vector3.zero;
         currentHP = playerHP;
+
+        _renderer = GetComponentInChildren<MeshRenderer>();
+        originColor = _renderer.material.color;
     }
 
     private void Update()
@@ -84,9 +93,11 @@ public class Player_Controller : MonoBehaviour
         if (hit.moveDirection.y < -0.3f)
             return;
 
-
-        if (hit.gameObject.tag == "Enemy")
-            Debug.Log("적팀!");
+        if (hit.gameObject.CompareTag("Enemy"))
+        {
+            Debug.Log("적과 충돌!");
+            Enemy_Controller ec = hit.gameObject.GetComponent<Enemy_Controller>();
+        }
 
     }
 
@@ -107,7 +118,48 @@ public class Player_Controller : MonoBehaviour
                     break;
             }
         }
+        else if (other.gameObject.CompareTag("Enemy"))
+        {
+            switch (other.gameObject.name)
+            {
+                case "Enemy Bullet":
+                    if (!isDamaged)
+                    {
+                        Debug.Log("적과 충돌!!!!");
+                        Bullet enemyBullet = other.GetComponent<Bullet>();
+                        currentHP -= enemyBullet.damage;
+                        StartCoroutine(OnDamage());
+                    }
+                    break;
+            }
+        }
     }
+
+    IEnumerator OnDamage()
+    {
+        isDamaged = true;
+
+
+        _renderer.material.color = Color.red;
+
+        yield return new WaitForSeconds(0.3f);
+        if (currentHP > 0)
+        {
+            _renderer.material.color = originColor;
+        }
+        else
+        {
+            _renderer.material.color = Color.gray;
+
+            Destroy(gameObject, 3);
+        }
+
+
+        yield return new WaitForSeconds(1f);
+
+        isDamaged = false;
+    }
+
 
     private void GetInput()
     {
@@ -191,7 +243,6 @@ public class Player_Controller : MonoBehaviour
         }
 
     }
-
 
     IEnumerator Attack()
     {
