@@ -5,12 +5,17 @@ using UnityEngine.AI;
 
 public class Enemy_Controller : MonoBehaviour
 {
+    public enum Type { A, B, C };
+    public Type enemyType;
+
     public float maxHP;
+    private float currentHP;
     private Transform _target;
+
     public bool isChase;
     public bool isAttack;
     public Collider attackCollider;
-
+    public GameObject bullet;
 
     private NavMeshAgent _agent;
     private Rigidbody _rigidbody;
@@ -18,7 +23,6 @@ public class Enemy_Controller : MonoBehaviour
     private Color originColor;
     private Animator _animator;
 
-    private float currentHP;
 
     private void Start()
     {
@@ -52,8 +56,26 @@ public class Enemy_Controller : MonoBehaviour
 
     private void Targeting()
     {
-        float targetRadius = 0.5f;
-        float targetRange = 0.5f;
+        float targetRadius = 0;
+        float targetRange = 0;
+
+        switch (enemyType)
+        {
+            case Type.A:
+                targetRadius = 0.5f;
+                targetRange = 1f;
+                break;
+
+            case Type.B:
+                targetRadius = 0.35f;
+                targetRange = 31f;
+                break;
+
+            case Type.C:
+                targetRadius = 0.2f;
+                targetRange = 20f;
+                break;
+        }
 
         RaycastHit[] rayHits = Physics.SphereCastAll(transform.position,
             targetRadius,
@@ -61,27 +83,58 @@ public class Enemy_Controller : MonoBehaviour
             targetRange,
             LayerMask.GetMask("Player"));
 
-        if(rayHits.Length > 0 && !isAttack)
-        {
+        if (rayHits.Length > 0 && !isAttack)
             StartCoroutine(Attack());
-        }
     }
 
     IEnumerator Attack()
     {
         isChase = false;
         isAttack = true;
-
         _animator.SetBool("isAttack", true);
 
-        yield return new WaitForSeconds(0.2f);
-        attackCollider.enabled = true;
+        switch (enemyType)
+        {
+            case Type.A:
+                yield return new WaitForSeconds(0.2f);
+                attackCollider.enabled = true;
 
-        yield return new WaitForSeconds(1f);
-        attackCollider.enabled = false;
+                yield return new WaitForSeconds(1f);
+                attackCollider.enabled = false;
+
+                yield return new WaitForSeconds(1f);
+                break;
+
+            case Type.B:
+                yield return new WaitForSeconds(0.5f);
+                _rigidbody.AddForce(transform.forward * 10, ForceMode.Impulse);
+                attackCollider.enabled = true;
+
+                yield return new WaitForSeconds(0.5f);
+                _rigidbody.velocity = Vector3.zero;
+                attackCollider.enabled = false;
+
+                yield return new WaitForSeconds(2f);
+                break;
+
+            case Type.C:
+                yield return new WaitForSeconds(0.5f);
+                Vector3 bulletPost = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    GameObject bulletInstant = Instantiate(bullet, bulletPost, transform.rotation);
+                    Rigidbody bulletRigid = bulletInstant.GetComponent<Rigidbody>();
+                    bulletRigid.velocity = transform.forward * 5f;
 
 
-        yield return new WaitForSeconds(1f);
+                    yield return new WaitForSeconds(0.2f);
+                }
+
+                yield return new WaitForSeconds(1f);
+                break;
+        }
+
         isChase = true;
         isAttack = false;
         _animator.SetBool("isAttack", false);

@@ -65,10 +65,10 @@ public class Player_Controller : MonoBehaviour
         _animator = GetComponent<Animator>();
         _camera = Camera.main;
         _characterController = GetComponent<CharacterController>();
+        _renderer = GetComponentInChildren<MeshRenderer>();
+
         moveDir = Vector3.zero;
         currentHP = playerHP;
-
-        _renderer = GetComponentInChildren<MeshRenderer>();
         originColor = _renderer.material.color;
     }
 
@@ -87,6 +87,7 @@ public class Player_Controller : MonoBehaviour
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         Rigidbody body = hit.collider.attachedRigidbody;
+
         if (body == null || body.isKinematic)
             return;
 
@@ -120,6 +121,15 @@ public class Player_Controller : MonoBehaviour
         }
         else if (other.gameObject.CompareTag("Enemy"))
         {
+            if (!isDamaged)
+            {
+                Debug.Log("적과 충돌!!!!");
+                Bullet enemyBullet = other.GetComponent<Bullet>();
+                currentHP -= enemyBullet.damage;
+                StartCoroutine(OnDamage());
+            }
+
+            /*
             switch (other.gameObject.name)
             {
                 case "Enemy Bullet":
@@ -132,6 +142,7 @@ public class Player_Controller : MonoBehaviour
                     }
                     break;
             }
+            */
         }
     }
 
