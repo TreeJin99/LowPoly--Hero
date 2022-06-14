@@ -127,6 +127,7 @@ public class Enemy_Controller : MonoBehaviour
                     Rigidbody bulletRigid = bulletInstant.GetComponent<Rigidbody>();
                     bulletRigid.velocity = transform.forward * 5f;
 
+                    Destroy(bulletInstant, 5f);
 
                     yield return new WaitForSeconds(0.2f);
                 }

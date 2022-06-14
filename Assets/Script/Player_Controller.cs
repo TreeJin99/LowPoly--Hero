@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player_Controller : MonoBehaviour
 {
@@ -11,6 +12,12 @@ public class Player_Controller : MonoBehaviour
     private CharacterController _characterController;
     private Renderer _renderer;
     private Color originColor;
+
+    private Text healthTxt;
+    private Text damageTxt;
+    private Text grenadeTxt;
+    private Text killTxt;
+    private Text timeTxt;
 
     // 플레이어 기본 스탯
     public float playerHP = 100f;
@@ -35,6 +42,8 @@ public class Player_Controller : MonoBehaviour
     private float currentSpeed;
     private float attackDelay;
     private int grenadeNum = 10;
+    private int killCount = 0;
+    private float currentTime = 0.0f;
 
     private Vector3 moveDir;
 
@@ -55,9 +64,16 @@ public class Player_Controller : MonoBehaviour
     private bool isCoolTime;
     private bool isDamaged;
 
+
     private void Awake()
     {
         PLAYER_INSTANCE = this;
+
+        healthTxt = GameObject.Find("Health Txt").GetComponent<Text>();
+        damageTxt = GameObject.Find("Damage Txt").GetComponent<Text>();
+        grenadeTxt = GameObject.Find("Grenade Txt").GetComponent<Text>();
+        killTxt = GameObject.Find("Kill Txt").GetComponent<Text>();
+        timeTxt = GameObject.Find("Stage Txt").GetComponent<Text>();
     }
 
     private void Start()
@@ -74,6 +90,7 @@ public class Player_Controller : MonoBehaviour
 
     private void Update()
     {
+        UpdateUI();
         GetInput();
         Movement();
         Action();
@@ -128,21 +145,6 @@ public class Player_Controller : MonoBehaviour
                 currentHP -= enemyBullet.damage;
                 StartCoroutine(OnDamage());
             }
-
-            /*
-            switch (other.gameObject.name)
-            {
-                case "Enemy Bullet":
-                    if (!isDamaged)
-                    {
-                        Debug.Log("적과 충돌!!!!");
-                        Bullet enemyBullet = other.GetComponent<Bullet>();
-                        currentHP -= enemyBullet.damage;
-                        StartCoroutine(OnDamage());
-                    }
-                    break;
-            }
-            */
         }
     }
 
@@ -264,6 +266,30 @@ public class Player_Controller : MonoBehaviour
         weaponCollider.enabled = false;
     }
 
+    public void DamageUp()
+    {
+        playerDamage += 30;
+    }
 
+    public void HealthUp()
+    {
+        currentHP += 100;
+    }
+
+    public void KillCountUp()
+    {
+        killCount++;
+    }
+
+    private void UpdateUI()
+    {
+        currentTime = +Time.deltaTime;
+
+        healthTxt.text = currentHP.ToString();
+        damageTxt.text = playerDamage.ToString();
+        timeTxt.text = currentTime.ToString();
+        killTxt.text = killCount.ToString();
+        grenadeTxt.text = grenadeNum.ToString();
+    }
 
 }

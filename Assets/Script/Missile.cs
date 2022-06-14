@@ -4,10 +4,6 @@ using UnityEngine;
 
 public class Missile : MonoBehaviour
 {
-    private void Start()
-    {
-        Destroy(gameObject, 5f);
-    }
 
     private void Update()
     {
