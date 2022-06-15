@@ -6,9 +6,11 @@ using UnityEngine.AI;
 public class Enemy_Controller : MonoBehaviour
 {
     public enum Type { A, B, C };
+    public GameObject[] dropItems;
     public Type enemyType;
 
     public float maxHP;
+    private float exp;
     private float currentHP;
     private Transform _target;
 
@@ -23,9 +25,12 @@ public class Enemy_Controller : MonoBehaviour
     private Color originColor;
     private Animator _animator;
 
+    private Player_Controller pc;
+
 
     private void Start()
     {
+        pc = Player_Controller.PLAYER_INSTANCE;
         _agent = GetComponent<NavMeshAgent>();
         _rigidbody = GetComponent<Rigidbody>();
         _renderer = GetComponentInChildren<MeshRenderer>();
@@ -64,16 +69,19 @@ public class Enemy_Controller : MonoBehaviour
             case Type.A:
                 targetRadius = 0.5f;
                 targetRange = 1f;
+                exp = 30f;
                 break;
 
             case Type.B:
                 targetRadius = 0.35f;
                 targetRange = 31f;
+                exp = 30f;
                 break;
 
             case Type.C:
                 targetRadius = 0.2f;
                 targetRange = 20f;
+                exp = 50f;
                 break;
         }
 
@@ -162,8 +170,6 @@ public class Enemy_Controller : MonoBehaviour
     {
         if (other.tag == "Attack")
         {
-
-            Player_Controller pc = Player_Controller.PLAYER_INSTANCE;
             currentHP -= pc.playerDamage;
             Vector3 knockBack = transform.position - other.transform.position;
             StartCoroutine(OnDamage(knockBack));
@@ -188,11 +194,19 @@ public class Enemy_Controller : MonoBehaviour
         {
             _renderer.material.color = Color.gray;
             gameObject.layer = 12;
-
+            pc.KillEnemy(exp);
             isChase = false;
             _agent.enabled = false;
             _animator.SetTrigger("doDie");
 
+            int dropRandomItem = Random.Range(0, dropItems.Length);
+            float dropChange = Random.Range(0, 10);
+            if(dropChange <= 1)
+            {
+                Vector3 itemPos = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
+                GameObject dropItem = Instantiate(dropItems[dropRandomItem], itemPos, transform.rotation);
+            }
+            
             Destroy(gameObject, 3);
         }
     }

@@ -33,7 +33,6 @@ public class Camera_Controller : MonoBehaviour
     private void Update()
     {
         GetInput();
-        CursorLock();
         CameraAngle();
     }
 
@@ -49,11 +48,7 @@ public class Camera_Controller : MonoBehaviour
         rotY += Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
     }
 
-    private void CursorLock()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
+
 
     private void CameraAngle()
     {

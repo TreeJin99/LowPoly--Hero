@@ -9,14 +9,19 @@ public class Grenade : MonoBehaviour
     public GameObject explosionEffectObj;
     public Rigidbody rigid;
 
+    private AudioSource explodeSound;
+
     private void Start()
     {
+        explodeSound = GetComponent<AudioSource>();
         StartCoroutine(Explosion());
     }
 
     IEnumerator Explosion()
     {
         yield return new WaitForSeconds(3f);
+
+        explodeSound.Play();
 
         // 속도 비활성화
         rigid.velocity = Vector3.zero;

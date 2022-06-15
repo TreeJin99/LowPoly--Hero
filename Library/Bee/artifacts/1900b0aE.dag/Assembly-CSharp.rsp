@@ -357,6 +357,8 @@
 "Assets/Script/Item_Controller.cs"
 "Assets/Script/Missile.cs"
 "Assets/Script/Player_Controller.cs"
+"Assets/Script/Scene_Controller.cs"
+"Assets/Script/Spawn_Controller.cs"
 "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01.cs"
 "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01_UGUI.cs"
 "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark02.cs"

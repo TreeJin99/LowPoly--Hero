@@ -77,6 +77,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e2049a6d656dca449d479195084928c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dropItems:
+  - {fileID: 4871937425809670766, guid: 315bebc6db46fc243bb4f520384befdc, type: 3}
+  - {fileID: 2659911047281219121, guid: 89178a23011a1204e829bad80329c54f, type: 3}
   enemyType: 2
   maxHP: 75
   isChase: 0

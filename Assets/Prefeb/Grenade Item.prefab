@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1335020124441061349}
   - component: {fileID: 681034796621623857}
   - component: {fileID: 2681021474223013085}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: "\uD050\uBE0C"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 5718991634242363785}
   - component: {fileID: 5718991634242363787}
   - component: {fileID: 8787412608999505073}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Grenade Item
   m_TagString: Item
   m_Icon: {fileID: 0}
@@ -109,8 +109,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4871937425809670766}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -118,7 +118,7 @@ Transform:
   - {fileID: 1335020124441061349}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!135 &5718991634242363785
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -219,7 +219,7 @@ GameObject:
   - component: {fileID: 8982129806117979057}
   - component: {fileID: 386112099148969263}
   - component: {fileID: 8096824532328606192}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}

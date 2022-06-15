@@ -6,6 +6,12 @@ using UnityEngine.UI;
 public class Player_Controller : MonoBehaviour
 {
     public static Player_Controller PLAYER_INSTANCE;
+    public AudioSource attackSound;
+    public AudioSource killSound;
+    public AudioSource onHitSound;
+    public AudioSource getItemSound;
+    public AudioSource throwGrenade;
+
 
     private Animator _animator;
     private Camera _camera;
@@ -18,6 +24,9 @@ public class Player_Controller : MonoBehaviour
     private Text grenadeTxt;
     private Text killTxt;
     private Text timeTxt;
+    private Text expTxt;
+    public GameObject levelupPanel;
+    public GameObject diePanel;
 
     // 플레이어 기본 스탯
     public float playerHP = 100f;
@@ -44,6 +53,8 @@ public class Player_Controller : MonoBehaviour
     private int grenadeNum = 10;
     private int killCount = 0;
     private float currentTime = 0.0f;
+    private float currentExp = 0.0f;
+    private float levelupExp = 100.0f;
 
     private Vector3 moveDir;
 
@@ -63,6 +74,7 @@ public class Player_Controller : MonoBehaviour
     private bool isDefend;
     private bool isCoolTime;
     private bool isDamaged;
+    private bool cursorLock = false;
 
 
     private void Awake()
@@ -74,6 +86,7 @@ public class Player_Controller : MonoBehaviour
         grenadeTxt = GameObject.Find("Grenade Txt").GetComponent<Text>();
         killTxt = GameObject.Find("Kill Txt").GetComponent<Text>();
         timeTxt = GameObject.Find("Stage Txt").GetComponent<Text>();
+        expTxt = GameObject.Find("Exp Txt").GetComponent<Text>();
     }
 
     private void Start()
@@ -90,6 +103,7 @@ public class Player_Controller : MonoBehaviour
 
     private void Update()
     {
+        CursorLock();
         UpdateUI();
         GetInput();
         Movement();
@@ -101,38 +115,20 @@ public class Player_Controller : MonoBehaviour
         toggleCamera();
     }
 
-    private void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        Rigidbody body = hit.collider.attachedRigidbody;
-
-        if (body == null || body.isKinematic)
-            return;
-
-        if (hit.moveDirection.y < -0.3f)
-            return;
-
-        if (hit.gameObject.CompareTag("Enemy"))
-        {
-            Debug.Log("적과 충돌!");
-            Enemy_Controller ec = hit.gameObject.GetComponent<Enemy_Controller>();
-        }
-
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Item"))
         {
             switch (other.gameObject.name)
             {
-                case "Health":
-                    Debug.Log("치료!");
-                    currentHP += 50;
+                case "Health(Clone)":
+                    currentHP += 30;
+                    getItemSound.Play();
                     break;
 
-                case "Grenade Item":
-                    Debug.Log("수류탄 획득!");
+                case "Grenade Item(Clone)":
                     grenadeNum++;
+                    getItemSound.Play();
                     break;
             }
         }
@@ -140,9 +136,15 @@ public class Player_Controller : MonoBehaviour
         {
             if (!isDamaged)
             {
-                Debug.Log("적과 충돌!!!!");
                 Bullet enemyBullet = other.GetComponent<Bullet>();
-                currentHP -= enemyBullet.damage;
+                if (!isDefend)
+                {
+                    currentHP -= enemyBullet.damage;
+                }
+                else
+                {
+                    currentHP -= (enemyBullet.damage) / 3;
+                }
                 StartCoroutine(OnDamage());
             }
         }
@@ -151,22 +153,25 @@ public class Player_Controller : MonoBehaviour
     IEnumerator OnDamage()
     {
         isDamaged = true;
-
-
         _renderer.material.color = Color.red;
+        onHitSound.Play();
 
         yield return new WaitForSeconds(0.3f);
         if (currentHP > 0)
         {
             _renderer.material.color = originColor;
         }
-        else
+        else if (currentHP <= 0)
         {
             _renderer.material.color = Color.gray;
 
-            Destroy(gameObject, 3);
-        }
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
 
+            gameObject.SetActive(false);
+            Time.timeScale = 0;
+            diePanel.SetActive(true);
+        }
 
         yield return new WaitForSeconds(1f);
 
@@ -198,6 +203,21 @@ public class Player_Controller : MonoBehaviour
             Vector3 playerRotate = Vector3.Scale(_camera.transform.forward, new Vector3(1, 0, 1));
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(playerRotate), Time.deltaTime * smoothness);
         }
+    }
+
+    private void CursorLock()
+    {
+        if (cursorLock == false)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        
     }
 
     private void Movement()
@@ -250,6 +270,7 @@ public class Player_Controller : MonoBehaviour
 
                 grenadeRigid.AddForce(new Vector3(moveDir.x, moveDir.y + 2, moveDir.z) * 2, ForceMode.Impulse);
                 grenadeRigid.AddTorque(Vector3.back * 10, ForceMode.Impulse);
+                throwGrenade.Play();
 
                 grenadeNum--;
             }
@@ -261,35 +282,66 @@ public class Player_Controller : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f);
         weaponCollider.enabled = true;
+        attackSound.Play();
 
         yield return new WaitForSeconds(0.3f);
         weaponCollider.enabled = false;
+        attackSound.Stop();
     }
 
     public void DamageUp()
     {
         playerDamage += 30;
+        levelupPanel.SetActive(false);
+        Time.timeScale = 1;
+        cursorLock = false;
+    }
+
+    public void AttackSpeedUp()
+    {
+        attackSpeed += 0.1f;
+        levelupPanel.SetActive(false);
+        Time.timeScale = 1;
+        cursorLock = false;
     }
 
     public void HealthUp()
     {
-        currentHP += 100;
+        currentHP += 50;
+        levelupPanel.SetActive(false);
+        Time.timeScale = 1;
+        cursorLock = false;
     }
 
-    public void KillCountUp()
+    public void KillEnemy(float exp)
     {
+        killSound.Play();
+        currentExp += exp;
         killCount++;
+        LevelUp();
+    }
+
+    private void LevelUp()
+    {
+        if (currentExp >= levelupExp)
+        {
+            levelupExp *= 1.5f;
+            Time.timeScale = 0;
+            cursorLock = true;
+            levelupPanel.SetActive(true);
+        }
     }
 
     private void UpdateUI()
     {
-        currentTime = +Time.deltaTime;
+        currentTime += Time.deltaTime;
+        timeTxt.text = string.Format("{0:N1}", currentTime);
 
         healthTxt.text = currentHP.ToString();
         damageTxt.text = playerDamage.ToString();
-        timeTxt.text = currentTime.ToString();
         killTxt.text = killCount.ToString();
         grenadeTxt.text = grenadeNum.ToString();
+        expTxt.text = currentExp.ToString();
     }
 
 }
